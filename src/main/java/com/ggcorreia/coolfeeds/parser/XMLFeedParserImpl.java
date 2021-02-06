@@ -16,32 +16,29 @@ import java.util.Iterator;
 
 public class XMLFeedParserImpl implements FeedParser{
 
-    static final String TITLE = "title";
-    static final String DESCRIPTION = "description";
-    static final String PUB_DATE = "pubDate";
-    static final String GUID = "guid";
-    static final String IMAGE = "enclosure";
-    static final String ITEM = "item";
+    private static final String TITLE = "title";
+    private static final String DESCRIPTION = "description";
+    private static final String PUB_DATE = "pubDate";
+    private static final String GUID = "guid";
+    private static final String IMAGE = "enclosure";
+    private static final String ITEM = "item";
+    private static final String EMPTY_STRING = "";
 
     @Override
     public Feed parse(final String sourceId, String sourceDescription, String content, int maxItems) {
         Feed feed = null;
         try {
-            boolean isHeader = true;
-            String description = "";
-            String title = "";
-            String pubdate = "";
-            String guid = "";
-            String image = "";
+            var isHeader = true;
+            var extractedInfo = new ExtractedInfo();
 
-            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes());
-            XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
-            int itemsAdded = 0;
+            var inputFactory = XMLInputFactory.newInstance();
+            var inputStream = new ByteArrayInputStream(content.getBytes());
+            var eventReader = inputFactory.createXMLEventReader(inputStream);
+            var itemsAdded = 0;
             while (eventReader.hasNext() && itemsAdded < maxItems) {
-                XMLEvent event = eventReader.nextEvent();
+                var event = eventReader.nextEvent();
                 if (event.isStartElement()) {
-                    String localPart = event.asStartElement().getName().getLocalPart();
+                    var localPart = event.asStartElement().getName().getLocalPart();
                     switch (localPart) {
                         case ITEM:
                             if (isHeader) {
@@ -55,29 +52,29 @@ public class XMLFeedParserImpl implements FeedParser{
                             event = eventReader.nextEvent();
                             break;
                         case TITLE:
-                            title = getElementInfo(event, eventReader);
+                            extractedInfo.setTitle(getElementInfo(eventReader));
                             break;
                         case DESCRIPTION:
-                            description = getDescription(eventReader);
+                            extractedInfo.setDescription(getDescription(eventReader));
                             break;
                         case IMAGE:
-                            image = getImgInfo(event);
+                            extractedInfo.setImage(getImgInfo(event));
                             break;
                         case GUID:
-                            guid = getElementInfo(event, eventReader);
+                            extractedInfo.setGuid(getElementInfo(eventReader));
                             break;
                         case PUB_DATE:
-                            pubdate = getElementInfo(event, eventReader);
+                            extractedInfo.setPubDate(getElementInfo(eventReader));
                             break;
                     }
                 } else if (event.isEndElement()) {
                     if (event.asEndElement().getName().getLocalPart() == (ITEM)) {
-                        FeedInfo feedInfo = FeedInfo.builder()
-                                .guid(guid)
-                                .title(title)
-                                .description(description)
-                                .pubDate(pubdate)
-                                .imgLink(image)
+                        var feedInfo = FeedInfo.builder()
+                                .guid(extractedInfo.getGuid())
+                                .title(extractedInfo.getTitle())
+                                .description(extractedInfo.getDescription())
+                                .pubDate(extractedInfo.getPubDate())
+                                .imgLink(extractedInfo.getImage())
                                 .build();
                         feed.getItems().add(feedInfo);
                         event = eventReader.nextEvent();
@@ -91,9 +88,9 @@ public class XMLFeedParserImpl implements FeedParser{
         return feed;
     }
 
-    private String getElementInfo(XMLEvent event, XMLEventReader eventReader) throws XMLStreamException {
-        String result = "";
-        event = eventReader.nextEvent();
+    private String getElementInfo(XMLEventReader eventReader) throws XMLStreamException {
+        var result = EMPTY_STRING;
+        var event = eventReader.nextEvent();
         if (event instanceof Characters) {
             result = event.asCharacters().getData();
         }
@@ -105,12 +102,12 @@ public class XMLFeedParserImpl implements FeedParser{
     }
 
     private String getImgInfo(XMLEvent event) {
-        String result = "";
-        String type = "";
-        Iterator<Attribute> iterator = event.asStartElement().getAttributes();
+        var result = "";
+        var type = "";
+        var iterator = event.asStartElement().getAttributes();
         while (iterator.hasNext())
         {
-            Attribute attribute = iterator.next();
+            var attribute = iterator.next();
             if(attribute.getName().toString() == "url"){
                 result = attribute.getValue();
             }else if(attribute.getName().toString() == "type"){

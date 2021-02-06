@@ -41,10 +41,12 @@ public class RSSFeedConsumerImpl implements FeedConsumer {
         Optional<Feed> dbFeed = feedService.getBySourceId(sourceId);
 
         if(dbFeed.isPresent()){
+            LOGGER.info("Feed already present. Removing..");
             feedService.remove(dbFeed.get());
         }
 
         for (FeedInfo feedInfo : feed.getItems()) {
+            LOGGER.info("Inserting new feeds..");
             feedInfoService.save(feedInfo);
         }
 
