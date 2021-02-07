@@ -1,0 +1,18 @@
+type Query {
+  getFeedsBySource(sourceId: String): Feed
+  getAllFeeds: [Feed]
+}
+
+type Feed {
+  sourceId: String
+  sourceDescription: String
+  items: [FeedItem]
+}
+
+type FeedItem {
+  guid: String
+  title: String
+  description: String
+  pubDate: String
+  imgLink: String
+}

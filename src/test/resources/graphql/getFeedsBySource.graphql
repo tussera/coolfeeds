@@ -1,0 +1,13 @@
+query {
+  getFeedsBySource(sourceId: "nos"){
+    sourceId,
+    sourceDescription
+    items{
+      guid
+      title
+      description
+      pubDate
+      imgLink
+    }
+  }
+}

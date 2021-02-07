@@ -1,20 +1,16 @@
 package com.ggcorreia.coolfeeds.parser;
 
 import com.ggcorreia.coolfeeds.model.Feed;
-import com.ggcorreia.coolfeeds.model.FeedInfo;
-
+import com.ggcorreia.coolfeeds.model.FeedItem;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-public class XMLFeedParserImpl implements FeedParser{
+public class XMLFeedParserImpl implements FeedParser {
 
     private static final String TITLE = "title";
     private static final String DESCRIPTION = "description";
@@ -29,7 +25,7 @@ public class XMLFeedParserImpl implements FeedParser{
         Feed feed = null;
         try {
             var isHeader = true;
-            var extractedInfo = new ExtractedInfo();
+            var extractedInfo = new ExtractedFeedItem();
 
             var inputFactory = XMLInputFactory.newInstance();
             var inputStream = new ByteArrayInputStream(content.getBytes());
@@ -44,10 +40,10 @@ public class XMLFeedParserImpl implements FeedParser{
                             if (isHeader) {
                                 isHeader = false;
                                 feed = Feed.builder()
-                                        .sourceId(sourceId)
-                                        .sourceDescription(sourceDescription)
-                                        .items(new ArrayList<>())
-                                        .build();
+                                    .sourceId(sourceId)
+                                    .sourceDescription(sourceDescription)
+                                    .items(new ArrayList<>())
+                                    .build();
                             }
                             event = eventReader.nextEvent();
                             break;
@@ -69,13 +65,13 @@ public class XMLFeedParserImpl implements FeedParser{
                     }
                 } else if (event.isEndElement()) {
                     if (event.asEndElement().getName().getLocalPart() == (ITEM)) {
-                        var feedInfo = FeedInfo.builder()
-                                .guid(extractedInfo.getGuid())
-                                .title(extractedInfo.getTitle())
-                                .description(extractedInfo.getDescription())
-                                .pubDate(extractedInfo.getPubDate())
-                                .imgLink(extractedInfo.getImage())
-                                .build();
+                        var feedInfo = FeedItem.builder()
+                            .guid(extractedInfo.getGuid())
+                            .title(extractedInfo.getTitle())
+                            .description(extractedInfo.getDescription())
+                            .pubDate(extractedInfo.getPubDate())
+                            .imgLink(extractedInfo.getImage())
+                            .build();
                         feed.getItems().add(feedInfo);
                         event = eventReader.nextEvent();
                         itemsAdded++;
@@ -105,12 +101,11 @@ public class XMLFeedParserImpl implements FeedParser{
         var result = "";
         var type = "";
         var iterator = event.asStartElement().getAttributes();
-        while (iterator.hasNext())
-        {
+        while (iterator.hasNext()) {
             var attribute = iterator.next();
-            if(attribute.getName().toString() == "url"){
+            if (attribute.getName().toString() == "url") {
                 result = attribute.getValue();
-            }else if(attribute.getName().toString() == "type"){
+            } else if (attribute.getName().toString() == "type") {
                 type = attribute.getValue();
             }
         }

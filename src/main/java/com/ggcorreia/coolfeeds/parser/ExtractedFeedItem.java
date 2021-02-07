@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ExtractedInfo {
+public class ExtractedFeedItem {
 
     private String description;
     private String title;

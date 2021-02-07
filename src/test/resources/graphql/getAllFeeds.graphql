@@ -1,0 +1,13 @@
+query {
+  getAllFeeds{
+    sourceId
+    sourceDescription
+    items {
+      guid
+      title
+      description
+      pubDate
+      imgLink
+    }
+  }
+}
